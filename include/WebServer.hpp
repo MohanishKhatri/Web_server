@@ -16,6 +16,6 @@ private:
     int server_fd_;   
 
     int acceptClient();
-    void sendResponse(int client_fd, const std::string& message);
+    void sendResponse(int client_fd);
     void closeConnection(int client_fd);
 };

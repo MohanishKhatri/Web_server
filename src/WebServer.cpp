@@ -1,9 +1,11 @@
 #include "WebServer.hpp"
 #include "SocketUtils.hpp"
+#include "HttpUtils.hpp"
 #include <iostream>
 #include <netdb.h>
 #include <unistd.h>
 #include <cstring>
+#include <algorithm>
 
 WebServer::WebServer(const std::string &port)
 { // Constructor for web server
@@ -41,14 +43,15 @@ void WebServer::initializeSocket()
 //Accepts client side connections and sends a response accordinly.
 void WebServer::acceptAndRespond()
 {
-    std::cout << "[INFO] Waiting for a client to connect on port " << port_ << "...\n";
+    std::cout << "[INFO] Waiting for clients on port " << port_ << "...\n";
+    while (true) {     //temporary fix to avoid closing after one conection
+        int client_fd = acceptClient();
+        if (client_fd == -1)
+            continue; // Try next client
 
-    int client_fd = acceptClient();
-    if (client_fd == -1)
-        return;
-
-    sendResponse(client_fd, "Hello from server\n");
-    closeConnection(client_fd);
+        sendResponse(client_fd);
+        closeConnection(client_fd);
+    }
 }
 
 int WebServer::acceptClient()
@@ -69,20 +72,33 @@ int WebServer::acceptClient()
     return client_fd;
 }
 
-void WebServer::sendResponse(int client_fd, const std::string &message)
-{
-    ssize_t bytes_sent = send(client_fd, message.c_str(), message.length(), 0);
+void WebServer::sendResponse(int client_fd) {
+    char buffer[2048];
+    // receiving request from client and storing in buffer
+    int bytes_received = recv(client_fd, buffer, sizeof(buffer) - 1, 0);
 
-    if (bytes_sent == -1)
-    {
-        std::cerr << "[ERROR] Failed to send response: " << strerror(errno) << "\n";
+    if (bytes_received <= 0) {
+        std::cerr << "[ERROR] Failed to read from client.\n";
+        return;
     }
-    else
-    {
-        const char *msg = "Hello from server";
-        std::cout << "[INFO] Sent message: \"" << msg << "\"" << std::endl;
-    }
+
+    buffer[bytes_received] = '\0';
+    std::string request = buffer;
+
+    // Extract array elements from body
+    std::vector<int> nums = parseJsonArray(request);
+
+
+    std::sort(nums.begin(), nums.end());
+
+
+    std::string response_body = buildJsonResponse(nums);
+
+    sendHttpResponse(client_fd, response_body);
+
+    std::cout << "[INFO] Responded with sorted array.\n";
 }
+
 
 void WebServer::closeConnection(int client_fd)
 {
