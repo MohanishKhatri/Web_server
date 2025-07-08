@@ -5,7 +5,7 @@ This project is a minimal web server written in modern C++ for learning socket p
 ## Features
 
 - Supports both IPv4 and IPv6
-- Handles multiple client connections (one at a time, in a loop)
+- Handles multiple client connections (one at a time, in a loop, or with epoll)
 - Parses a JSON array from HTTP POST requests, sorts it, and returns the sorted array as JSON
 - Simple, modular codebase for learning and extension
 
@@ -23,6 +23,7 @@ Web_server/
 │   ├── SocketUtils.cpp
 │   └── HttpUtils.cpp
 ├── README.md
+├── BenchmarkResults.md
 ```
 
 ## How to Build
@@ -69,31 +70,15 @@ Content-Length: 21
 
 We benchmarked the server using ApacheBench (`ab`) to evaluate its performance under concurrent load.
 
-For example, with the following command:
+**See [BenchmarkResults.md](BenchmarkResults.md) for detailed results comparing blocking and epoll modes.**
 
-```bash
-echo '[3,1,2,-5]' > data.json
-ab -n 100 -c 10 -p data.json -T application/json http://127.0.0.1:8080/
-```
+## References & Resources
 
-### Benchmark Results
-
-```
-Concurrency Level:      10
-Time taken for tests:   0.008 seconds
-Complete requests:      100
-Failed requests:        0
-Requests per second:    12128.56 [#/sec] (mean)
-Time per request:       0.825 [ms] (mean)
-Transfer rate:          1137.05 [Kbytes/sec] received
-```
-
-**Conclusions:**
-- The server is capable of handling over 12,000 requests per second with 10 concurrent clients on a typical local machine.
-- All requests completed successfully with no failures.
-- The average response time per request was less than 1 millisecond.
-- This demonstrates that even a simple, single-threaded C++ server can achieve high throughput for lightweight tasks.
+- [Beej's Guide to Network Programming](https://beej.us/guide/bgnet/) — Excellent introduction to socket programming in C/C++.
+- [man 2 socket](https://man7.org/linux/man-pages/man2/socket.2.html) — Linux manual page for the `socket` system call.
+- [man 7 epoll](https://man7.org/linux/man-pages/man7/epoll.7.html) — Linux manual page for the `epoll` API.
+- [cppreference.com](https://en.cppreference.com/w/) — C++ standard library reference.
 
 ---
 
-Feel free to extend this project or use it as a base for more advanced
+Feel free to extend this project or use it as a base for more advanced networking and HTTP experiments!
