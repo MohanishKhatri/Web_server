@@ -11,7 +11,7 @@ struct addrinfo* resolveAddress(const std::string& port) {
     hints.ai_socktype = SOCK_STREAM;    // TCP
     hints.ai_flags = AI_PASSIVE;        // For server: bind to all interfaces
 
-    struct addrinfo* res;
+    struct addrinfo* res; //neeed to be freed after use 
     int status = getaddrinfo(nullptr, port.c_str(), &hints, &res);
     if (status != 0) {
         std::cerr << "getaddrinfo error: " << gai_strerror(status) << "\n";
@@ -28,7 +28,7 @@ int createSocket(int family, int type, int protocol) {
         std::cerr << "socket error: " << strerror(errno) << "\n";
         exit(1);
     }
-
+    // Allows to reuse port which is in time_wait state
     int yes = 1;
     if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)) == -1) {
         std::cerr << "setsockopt error: " << strerror(errno) << "\n";

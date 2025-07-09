@@ -22,24 +22,31 @@ Web_server/
 │   ├── WebServer.cpp
 │   ├── SocketUtils.cpp
 │   └── HttpUtils.cpp
+├── Makefile
 ├── README.md
 ├── BenchmarkResults.md
 ```
 
 ## How to Build
 
-From the project root, run:
+From the project root, simply run:
 
 ```bash
-g++ -Iinclude -o webserver src/main.cpp src/WebServer.cpp src/SocketUtils.cpp src/HttpUtils.cpp
+make build
 ```
 
 ## How to Run
 
-Start the server:
+Start the server with:
 
 ```bash
-./webserver
+make run
+```
+
+To clean up the build output:
+
+```bash
+make clean
 ```
 
 ## How to Test
